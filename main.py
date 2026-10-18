@@ -1,3 +1,4 @@
+import json
 import os
 import time
 from datetime import datetime
@@ -23,7 +24,13 @@ def send_telegram_message(message):
 
 def check_prz_zones():
     # 1. Koneksi ke Google Sheets
-    gc = gspread.service_account(filename="credentials.json")
+    # gc = gspread.service_account(filename="credentials.json")
+    creds_json_str = os.environ.get("GOOGLE_CREDENTIALS")
+    if not creds_json_str:
+        raise ValueError("GOOGLE_CREDENTIALS environment variable tidak ditemukan!")
+
+    creds_dict = json.loads(creds_json_str)
+    gc = gspread.service_account_from_dict(creds_dict)
     sheet = gc.open(SPREADSHEET_NAME).worksheet("Watchlist")
     data = sheet.get_all_records()  # Mengambil semua baris sebagai dictionary
 
