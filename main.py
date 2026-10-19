@@ -60,7 +60,7 @@ def check_prz_zones():
     # Tiingo top endpoint mengembalikan list of dict
     price_map = {}
     for item in prices_data:
-        ticker = item["index"].lower()
+        ticker = item["ticker"].lower()
         # Menggunakan mid price (rata-rata bid dan ask) atau harga last
         bid = item.get("bidPrice", 0)
         ask = item.get("askPrice", 0)
