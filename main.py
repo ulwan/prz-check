@@ -24,7 +24,7 @@ def send_telegram_message(message):
 
 def check_prz_zones():
     # 1. Koneksi ke Google Sheets
-    # gc = gspread.service_account(filename="credentials.json")
+    gc = gspread.service_account(filename="credentials.json")
     creds_json_str = os.environ.get("GOOGLE_CREDENTIALS")
     if not creds_json_str:
         raise ValueError("GOOGLE_CREDENTIALS environment variable tidak ditemukan!")
@@ -33,13 +33,14 @@ def check_prz_zones():
     gc = gspread.service_account_from_dict(creds_dict)
     sheet = gc.open(SPREADSHEET_NAME).worksheet("Watchlist")
     data = sheet.get_all_records()  # Mengambil semua baris sebagai dictionary
+    print(data)
 
     if not data:
         print("Watchlist kosong.")
         return
 
     # 2. Ambil list unique ticker dari Google Sheets
-    tickers = list(set([row["ticker"].strip().lower() for row in data if row["ticker"]]))
+    tickers = list(set([row["Ticker"].strip().lower() for row in data if row["Ticker"]]))
     if not tickers:
         return
 
@@ -54,12 +55,12 @@ def check_prz_zones():
     except Exception as e:
         print(f"Gagal mengambil data dari Tiingo: {e}")
         return
-
+    print(prices_data)
     # Petakan harga mid/bid/ask ke dalam dictionary
     # Tiingo top endpoint mengembalikan list of dict
     price_map = {}
     for item in prices_data:
-        ticker = item["ticker"].lower()
+        ticker = item["index"].lower()
         # Menggunakan mid price (rata-rata bid dan ask) atau harga last
         bid = item.get("bidPrice", 0)
         ask = item.get("askPrice", 0)
@@ -68,7 +69,7 @@ def check_prz_zones():
 
     # 4. Evaluasi setiap baris PRZ di Google Sheets
     for idx, row in enumerate(data, start=2):  # Mulai dari baris 2 (header di baris 1)
-        ticker = str(row["ticker"]).strip().lower()
+        ticker = str(row["Ticker"]).strip().lower()
         zone_type = str(row["type"]).strip().upper()  # BULLISH / BEARISH
         prz_low = float(row["prz_low"])
         prz_high = float(row["prz_high"])
